@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const crypto = require('crypto');
-const sendEmail = require('../utils/sendEmail');
+const emailService = require('../utils/sendEmail');
 
 const generateToken = (id) => {
     return jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -100,13 +100,13 @@ const forgotPassword = async (req, res) => {
         `;
 
         try {
-            await sendEmail({ email: user.email, subject: 'TaskFlow Password Reset Code', html });
+            await emailService.sendEmail({ email: user.email, subject: 'TaskFlow Password Reset Code', html });
             res.json({ message: 'Reset code sent to email' });
         } catch (emailErr) {
             user.resetPasswordToken = undefined;
             user.resetPasswordExpire = undefined;
             await user.save({ validateBeforeSave: false });
-            res.status(500).json({ message: 'Email could not be sent' });
+            res.status(500).json({ message: 'Email could not be sent' + emailErr.message });
         }
     } catch (error) {
         res.status(500).json({ message: error.message });
