@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../services/api';
+import toast from 'react-hot-toast';
 
 // Step 1: Enter email
 // Step 2: Enter 6-digit code received via email
@@ -65,9 +66,19 @@ const ForgotPassword = () => {
         setError('');
         try {
             await api.post('/auth/reset-password', { email, code, newPassword });
+            toast.success('Password reset successfully', {
+                style: {
+                    borderRadius: '10px',
+                },
+            });
             setSuccessMsg('Password reset successfully! Redirecting to login...');
             setTimeout(() => navigate('/login'), 2000);
         } catch (err) {
+            toast.error(err.response?.data?.message || 'Failed to reset password', {
+                style: {
+                    borderRadius: '10px',
+                },
+            });
             setError(err.response?.data?.message || 'Failed to reset password');
         } finally {
             setLoading(false);

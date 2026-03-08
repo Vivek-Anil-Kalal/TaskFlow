@@ -41,7 +41,7 @@ const Login = () => {
             });
             navigate('/');
         } catch (err) {
-            // setError(err.response?.data?.message || 'Login failed');
+            setError(err.response?.data?.message || 'Login failed');
             toast.error(err.response?.data?.message || 'Login failed', {
                 style: {
                     borderRadius: '10px',

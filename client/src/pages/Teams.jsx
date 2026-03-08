@@ -62,21 +62,36 @@ const Teams = () => {
                     </button>
                 )}
             </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {users.filter(u => u._id !== currentUser?._id).map((user) => (
-                    <div key={user._id} className="card flex items-center gap-4 cursor-pointer">
-                        <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center text-xl font-bold text-gray-500 overflow-hidden">
-                            {user.avatarUrl ? <img src={user.avatarUrl} alt={user.username} className="w-full h-full object-cover" /> : user.username[0]}
-                        </div>
-                        <div>
-                            <h3 className="font-bold text-gray-900 dark:text-white">{user.fullName || user.username}</h3>
-                            <p className="text-sm text-mint-600 capitalize">{user.role}</p>
-                            <p className="text-xs text-gray-500">{user.email}</p>
-                        </div>
+            {
+                loading ? (
+                    <div className="flex items-center justify-center py-20 text-gray-400">
+                        <svg className="animate-spin w-6 h-6 mr-2" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                        </svg>
+                        Loading Members...
                     </div>
-                ))}
-            </div>
+                ) : users.length === 0 ? (
+                    <div className="py-20 text-center text-gray-400 dark:text-gray-500">
+                        <div className="text-5xl mb-4">📋</div>
+                        <p className="text-lg font-medium">No Members found</p>
+                    </div>
+                ) :
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {users.filter(u => u._id !== currentUser?._id).map((user) => (
+                            <div key={user._id} className="card flex items-center gap-4 cursor-pointer">
+                                <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center text-xl font-bold text-gray-500 overflow-hidden">
+                                    {user.avatarUrl ? <img src={user.avatarUrl} alt={user.username} className="w-full h-full object-cover" /> : user.username[0]}
+                                </div>
+                                <div>
+                                    <h3 className="font-bold text-gray-900 dark:text-white">{user.fullName || user.username}</h3>
+                                    <p className="text-sm text-mint-600 capitalize">{user.role}</p>
+                                    <p className="text-xs text-gray-500">{user.email}</p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+            }
 
             <Modal
                 isOpen={isModalOpen}
