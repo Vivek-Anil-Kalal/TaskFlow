@@ -1,7 +1,12 @@
 import React, { useEffect, useState } from 'react';
+import { useDispatch } from 'react-redux';
+import { HiOutlineLogout } from 'react-icons/hi';
 import api from '../services/api';
 import banner from '../assets/profile-banner.png';
+import { logout } from '../store/authSlice';
+
 const Profile = () => {
+    const dispatch = useDispatch();
     const [profile, setProfile] = useState(null);
 
     useEffect(() => {
@@ -15,6 +20,10 @@ const Profile = () => {
         }
         fetchProfile();
     }, []);
+
+    const handleLogout = () => {
+        dispatch(logout());
+    };
 
     if (!profile) return <div>Loading...</div>;
 
@@ -58,6 +67,18 @@ const Profile = () => {
                         </div>
                     </div>
                 </div>
+            </div>
+
+            {/* Logout button - visible only on mobile */}
+            <div className="md:hidden px-6 pb-24">
+                <button
+                    id="mobile-logout-button"
+                    onClick={handleLogout}
+                    className="flex items-center justify-center gap-3 w-full px-4 py-3 rounded-xl bg-red-50 dark:bg-red-900/10 text-red-500 font-medium hover:bg-red-100 dark:hover:bg-red-900/20 transition-colors duration-200"
+                >
+                    <HiOutlineLogout className="w-5 h-5" />
+                    Logout
+                </button>
             </div>
         </div>
     );
