@@ -29,12 +29,20 @@ const Teams = () => {
         setLoading(true);
         try {
             await api.post('/users', formData);
+            toast.success('User invited successfully', {
+                style: {
+                    borderRadius: '10px',
+                },
+            });
             setIsModalOpen(false);
             setFormData({ email: '', role: 'developer', fullName: '' });
             fetchUsers(); // Refresh list
-            alert('User invited successfully!');
         } catch (err) {
-            alert(err.response?.data?.message || 'Failed to invite user');
+            toast.error('Failed to invite user', {
+                style: {
+                    borderRadius: '10px',
+                },
+            });
         } finally {
             setLoading(false);
         }

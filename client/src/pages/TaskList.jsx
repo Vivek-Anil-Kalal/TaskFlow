@@ -97,12 +97,11 @@ const TaskList = () => {
                 });
                 setTasks(tasks.filter(t => t._id !== id));
             } catch (err) {
-                toast.error('Failed to delete task', {
+                toast.error(err.response?.data?.message || 'Failed to delete task', {
                     style: {
                         borderRadius: '10px',
                     },
                 });
-                alert(err.response?.data?.message || 'Failed to delete task');
             }
         }
     };
@@ -133,8 +132,11 @@ const TaskList = () => {
             setIsModalOpen(false);
             fetchTasks();
         } catch (err) {
-            alert(err.response?.data?.message || 'Failed to save task');
-            toast.error('Failed to save task');
+            toast.error(err.response?.data?.message || 'Failed to save task', {
+                style: {
+                    borderRadius: '10px',
+                },
+            });
         } finally {
             setSubmitting(false);
         }

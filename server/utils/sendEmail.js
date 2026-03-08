@@ -1,56 +1,67 @@
-const nodemailer = require('nodemailer');
+const { google } = require('googleapis');
+const MailComposer = require('nodemailer/lib/mail-composer');
 
-const sendEmail = async (options) => {
-    // Use Ethereal for testing or User-provided SMTP
-    // For "free", Ethereal is best unless user provides Gmail credentials.
+class EmailService {
+    constructor() {
+        // 1. Setup the OAuth2 Client
+        this.oauth2Client = new google.auth.OAuth2(
+            process.env.OAUTH_CLIENT_ID,
+            process.env.OAUTH_CLIENT_SECRET,
+            'https://developers.google.com/oauthplayground' // Ensure this matches your Google Console Redirect URI
+        );
 
-    let transporter;
-
-    if (process.env.SMTP_HOST) {
-        transporter = nodemailer.createTransport({
-            host: process.env.SMTP_HOST,
-            port: process.env.SMTP_PORT,
-            secure: process.env.SMTP_SECURE === 'true',
-            auth: {
-                user: process.env.SMTP_EMAIL,
-                pass: process.env.SMTP_PASSWORD,
-            },
+        // 2. Set the Refresh Token
+        this.oauth2Client.setCredentials({
+            refresh_token: process.env.OAUTH_REFRESH_TOKEN
         });
-    } else {
-        // Fallback to Ethereal 
-        // Usually need await nodemailer.createTestAccount();
-        // But let's log to console as well for dev ease.
-        const testAccount = await nodemailer.createTestAccount();
-        console.log(`Ethereal Email created: ${testAccount.user} / ${testAccount.pass}`);
 
-        transporter = nodemailer.createTransport({
-            host: 'smtp.ethereal.email',
-            port: 587,
-            secure: false, // true for 465, false for other ports
-            auth: {
-                user: testAccount.user, // generated ethereal user
-                pass: testAccount.pass, // generated ethereal password
-            },
-        });
+        // 3. Initialize Gmail Instance
+        this.gmail = google.gmail({ version: 'v1', auth: this.oauth2Client });
     }
 
-    const message = {
-        from: `${process.env.FROM_NAME || 'TaskFlow'} <${process.env.FROM_EMAIL || 'noreply@taskflow.com'}>`,
-        to: options.email,
-        subject: options.subject,
-        text: options.message, // Plain text body
-        html: options.html, // HTML body
-    };
+    /**
+     * Sends an email using the Gmail API (OAuth2)
+     * @param {Object} options - { email, subject, message, html }
+     */
+    async sendEmail(options) {
+        try {
+            // Structure the mail options to match your previous usage
+            const mailOptions = {
+                from: `${process.env.FROM_NAME || 'TaskFlow'} <${process.env.OAUTH_EMAIL}>`,
+                to: options.email,
+                subject: options.subject,
+                text: options.message,
+                html: options.html || options.message,
+                textEncoding: 'base64'
+            };
 
-    try {
-        const info = await transporter.sendMail(message);
-        console.log('Message sent: %s', info.messageId);
-        // Preview only available when sending through an Ethereal account
-        console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
-    } catch (err) {
-        console.error("Error sending email: ", err);
-        throw new Error("Email sending failed");
+            // Compile the email content using MailComposer
+            const mail = new MailComposer(mailOptions);
+            const message = await mail.compile().build();
+
+            // Encode the message to Base64 (Gmail API requirement)
+            const rawMessage = Buffer.from(message)
+                .toString('base64')
+                .replace(/\+/g, '-')
+                .replace(/\//g, '_')
+                .replace(/=+$/, '');
+
+            // Execute the send request
+            const result = await this.gmail.users.messages.send({
+                userId: 'me',
+                requestBody: {
+                    raw: rawMessage
+                }
+            });
+
+            console.log('Email sent successfully via Gmail API:', result.data.id);
+            return result.data;
+        } catch (error) {
+            console.error('Error sending email through Gmail API:', error);
+            throw new Error("Email sending failed");
+        }
     }
-};
+}
 
-module.exports = sendEmail;
+// Export a single instance (Singleton)
+module.exports = new EmailService();

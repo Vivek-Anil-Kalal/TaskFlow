@@ -80,7 +80,11 @@ const MyTasks = () => {
                 await api.delete(`/tasks/${id}`);
                 setTasks(tasks.filter(t => t._id !== id));
             } catch (err) {
-                alert(err.response?.data?.message || 'Failed to delete task');
+                toast.error(err.response?.data?.message || 'Failed to delete task', {
+                    style: {
+                        borderRadius: '10px',
+                    },
+                });
             }
         }
     };
@@ -96,7 +100,11 @@ const MyTasks = () => {
             setIsModalOpen(false);
             fetchMyTasks();
         } catch (err) {
-            alert(err.response?.data?.message || 'Failed to update task');
+            toast.error(err.response?.data?.message || 'Failed to update task', {
+                style: {
+                    borderRadius: '10px',
+                },
+            });
         } finally {
             setSubmitting(false);
         }

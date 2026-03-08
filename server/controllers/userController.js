@@ -1,5 +1,5 @@
 const User = require('../models/User');
-const sendEmail = require('../utils/sendEmail');
+const emailService = require('../utils/sendEmail');
 
 // @desc    Get all users
 // @route   GET /api/users
@@ -75,7 +75,7 @@ const createUser = async (req, res) => {
         `;
 
         try {
-            await sendEmail({
+            await emailService.sendEmail({
                 email: user.email,
                 subject: 'TaskFlow Invitation',
                 html: message,
