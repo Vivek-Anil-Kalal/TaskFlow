@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import api from '../services/api';
 import Modal from '../components/common/Modal';
+import toast from 'react-hot-toast';
 
 const Teams = () => {
     const [users, setUsers] = useState([]);
